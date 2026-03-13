@@ -1,0 +1,50 @@
+import { useState } from "react";
+import { AnimatePresence } from "framer-motion";
+import LandingPage from "@/components/LandingPage";
+import CameraTest from "@/components/CameraTest";
+import Quiz from "@/components/Quiz";
+import Checkout from "@/components/Checkout";
+import PostCheckout from "@/components/PostCheckout";
+import MainApp from "@/components/MainApp";
+
+type Step = "landing" | "camera" | "quiz" | "checkout" | "postcheckout" | "app";
+
+const Index = () => {
+  const [step, setStep] = useState<Step>(() => {
+    const saved = localStorage.getItem("blueshield-onboarded");
+    return saved === "true" ? "app" : "landing";
+  });
+
+  const completeOnboarding = () => {
+    localStorage.setItem("blueshield-onboarded", "true");
+    setStep("app");
+  };
+
+  return (
+    <div className="relative min-h-screen">
+      {/* Blue light filter overlay */}
+      <div id="blue-filter-overlay" className="blue-filter-overlay" />
+
+      <AnimatePresence mode="wait">
+        {step === "landing" && (
+          <LandingPage key="landing" onStart={() => setStep("camera")} />
+        )}
+        {step === "camera" && (
+          <CameraTest key="camera" onComplete={() => setStep("quiz")} />
+        )}
+        {step === "quiz" && (
+          <Quiz key="quiz" onComplete={() => setStep("checkout")} />
+        )}
+        {step === "checkout" && (
+          <Checkout key="checkout" onPurchase={() => setStep("postcheckout")} />
+        )}
+        {step === "postcheckout" && (
+          <PostCheckout key="postcheckout" onContinue={completeOnboarding} />
+        )}
+        {step === "app" && <MainApp key="app" />}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+export default Index;
